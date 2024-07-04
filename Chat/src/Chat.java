@@ -7,16 +7,48 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 
+// TODO: Auto-generated Javadoc
+/**
+ * Klasa odpowiedzialna jest za wyświetlanie GUI aplikacji, jak i również wysyłanie i odbieranie zaszyfrowanych
+ * wiadomości.
+ */
 public class Chat extends JFrame {
+    
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1432098293678393253L;
+    
+    /** The chat area. */
     private JTextArea chatArea;
+    
+    /** The input field. */
     private JTextField inputField;
+    
+    /** The send button. */
     private JButton sendButton;
+    
+    /** The aes key. */
     private SecretKey aesKey;
+    
+    /** The out. */
     private ObjectOutputStream out;
+    
+    /** The in. */
     private ObjectInputStream in;
+    
+    /** The socket. */
     private Socket socket;
-
+    
+	/**
+	 * Konstruktor pryjmuje tytuł, czyli nadawcę wiadomości wpisywanej w oknie, socket otwarty w klasach Client i Server
+	 * oraz strumienie wiadomości przychodzących i wychodzących. * Po utworzeniu okna aplikacji, następuje wymiana wiadomości między klientem a serwerem.
+	 *
+	 * @param title the title
+	 * @param socket the socket
+	 * @param aesKey the aes key
+	 * @param out the out
+	 * @param in the in
+	 */
+	
     public Chat(String title, Socket socket, SecretKey aesKey, ObjectOutputStream out, ObjectInputStream in) {
         super(title);
         this.aesKey = aesKey;
@@ -63,7 +95,13 @@ public class Chat extends JFrame {
         new Thread(new MessageListener()).start();
     }
 
-    private synchronized void sendMessage() {
+    /**
+	 * Proces wysyłania zaszyfrowanej wiadomości następuje po jej wpisaniu i wysłaniu za pomoca przycisku
+	 * lub kliknięcia przycisku Enter. Polega on na szyfrowaniu wiadomości kluczem AES, wygenerowanym wcześniej
+	 * w klasie wywołującej pojawienie się GUI i przekazanym do konstruktora. Następnie jest przekazywana sieciowo
+	 * za pomoca Socketa do drugiego otworzonego okna.
+	 */
+	private synchronized void sendMessage() {
         try {
             System.out.println("Is socket either null or closed?");
             System.out.println("It is null: " + (socket == null));
@@ -83,8 +121,25 @@ public class Chat extends JFrame {
             chatArea.append("Error: " + e.getMessage() + "\n");
         }
     }
+    
+	/*
+	 
+	 */
 
-    private class MessageListener implements Runnable {
+    /**
+	 * 
+	 * Klasa wewnętrzna MessageListener "nasłuchuje" przychodzących wiadomości.
+	 * Implementuje interfejs Runnable, czyli następuje ciągłe nasłuchiwanie wiadomości, dopóki połaczenie nie zostanie przerwane
+	 * Odszyfrowanie wiadomości następuje znowu z wykorzystaniem klasy AESUtil i jej metody decrypt(key, message). 
+	 * Następnie następuje jej wyświetlenie pod ostatnia wiadomością, lub na samym początku, jeżeli jest to pierwsza wiadomość.
+	 *
+	 * @see MessageEvent
+	 */
+	private class MessageListener implements Runnable {
+        
+        /**
+         * Run.
+         */
         @Override
         public synchronized void run() {
             try {
